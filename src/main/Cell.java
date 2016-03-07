@@ -7,17 +7,27 @@ public class Cell {
 
     public State state;
     public CellPosition position;
+    public double cost;
 
     public Cell(State state, CellPosition position) {
         this.state = state;
         this.position = position;
+        this.cost = 0;
+    }
+
+    public void setCost(double cost) {
+        this.cost = cost;
+    }
+
+    public double getCost() {
+        return cost;
     }
 
     public void setState(State state) {
         this.state = state;
     }
 
-    public State currentState() {
+    public State getState() {
         return this.state;
     }
 
@@ -36,7 +46,7 @@ public class Cell {
         public Character getValue(){return value;}
     }
 
-    public static State getState(Character c) {
+    public static State getStateFromChar(Character c) {
 
         if(c.equals(State.INITIAL.getValue())) {
             return State.INITIAL;

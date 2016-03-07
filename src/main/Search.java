@@ -27,22 +27,63 @@ public class Search {
     public class CellComparator implements Comparator<Cell> {
         @Override
         public int compare(Cell a, Cell b) {
-            if(manhattan(a, goal) > manhattan(b, goal)) {
+            /*if(manhattan(a, goal) > manhattan(b, goal)) {
                 return -1;
             }
             if(manhattan(a, goal) < manhattan(b, goal)){
                 return 1;
+            }*/
+            if(a.cost > b.cost) {
+                return 1;
+            }
+            if(a.cost < b.cost){
+                return -1;
             }
             return 0;
         }
     }
 
-    public int manhattan(Cell current, Cell goal) {
-        int value = Math.abs(current.position.X - goal.position.X) + Math.abs(current.position.Y - goal.position.Y);
+    public double euclidean(Cell current, Cell goal) {
+        //double value = Math.sqrt((current.position.X - goal.position.X)^2 + (current.position.Y - goal.position.Y)^2);
+        double value = Math.sqrt(Math.pow(current.position.X - goal.position.X, 2) + Math.pow(current.position.Y - goal.position.Y, 2));
+        current.setCost(value);
         return value;
     }
 
-    public void bestFirstSearchManhattan() {
+    public double manhattan(Cell current, Cell goal) {
+        double value = Math.abs(current.position.X - goal.position.X) + Math.abs(current.position.Y - goal.position.Y);
+        current.setCost(value);
+        return value;
+    }
+
+    public double euclideanAndCost(Cell current, Cell goa) {
+        double value = euclidean(current, goa) + Double.valueOf(path.size());
+        current.setCost(value);
+        return value;
+    }
+
+    public double manhattanAndCost(Cell current, Cell goal) {
+        double value = manhattan(current, goal) + Double.valueOf(path.size());
+        current.setCost(value);
+        return value;
+    }
+
+    public double evaluationFunctions(int function, Cell current, Cell goal) {
+
+        if(function == 1) {
+            return euclidean(current, goal);
+        }
+        else if(function == 2) {
+            return manhattan(current, goal);
+        } else if(function == 3) {
+            return  euclideanAndCost(current, goal);
+        } else if(function == 4) {
+            return manhattanAndCost(current, goal);
+        }
+        return 0;
+    }
+
+    public void bestFirstSearch(int function) {
 
         while(visited.size() != FileManager.size*FileManager.size && current != goal) {
 
@@ -52,13 +93,14 @@ public class Search {
                 if(visited.contains(cell)) {
                     continue;
                 }
-                if(cell.currentState().equals(Cell.State.GOAL)) {
+                if(cell.getState().equals(Cell.State.GOAL)) {
                     path.push(cell);
                     createSolution();
                     return;
                 }
 
-                manhattan(cell, goal);
+                //manhattan(cell, goal);
+                evaluationFunctions(function, cell, goal);
                 fringe.add(cell);
             }
 
@@ -85,6 +127,34 @@ public class Search {
 
     }
 
+    public void bestFirstSearch2(int function) {
+
+        fringe.add(current);
+        while(!fringe.isEmpty() && (current != goal)) {
+
+            current = fringe.poll();
+            path.push(current);
+            LinkedList<Cell> neighbors = environment.getNeighbors(current);
+            if(neighbors.isEmpty()) {
+                path.pop();
+            }
+            for(Cell cell : neighbors) {
+
+                if(visited.contains(cell)) {
+                    continue;
+                }
+
+                evaluationFunctions(function, cell, goal);
+                fringe.add(cell);
+            }
+
+            visited.addLast(current);
+
+        }
+        createSolution();
+
+    }
+
     public LinkedList<Cell> getVisited() {
         return visited;
     }
@@ -97,7 +167,7 @@ public class Search {
 
         LinkedList<Cell> path = getPath();
         for (Cell c : path) {
-            if(FileManager.cells[c.position.X][c.position.Y].currentState().equals(Cell.State.OPEN))
+            if(FileManager.cells[c.position.X][c.position.Y].getState().equals(Cell.State.OPEN))
                 FileManager.cells[c.position.X][c.position.Y].setState(Cell.State.PATH);
         }
 

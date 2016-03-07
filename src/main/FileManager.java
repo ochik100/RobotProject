@@ -38,7 +38,7 @@ public class FileManager {
         int position = 0;
         for(int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                Cell.State s = Cell.getState(data.charAt(position));
+                Cell.State s = Cell.getStateFromChar(data.charAt(position));
                 cells[j][i] = new Cell(s, new CellPosition(j, i));
                 if(s.equals(Cell.State.INITIAL)) {
                     initial = cells[j][i];
@@ -49,7 +49,7 @@ public class FileManager {
             }
         }
 
-        printEnvironment();
+        //printEnvironment();
 
         return new Environment(cells, initial, goal);
     }
