@@ -155,6 +155,36 @@ public class Search {
 
     }
 
+    public Cell bestFirstSearch3(int function) {
+
+        fringe.add(current);
+        while(!fringe.isEmpty()) {
+
+            current = fringe.poll();
+            if(current == goal)
+                return current;
+            LinkedList<Cell> neighbors = environment.getNeighbors(current);
+
+            for(Cell cell : neighbors) {
+
+                if(visited.contains(cell)) {
+                    continue;
+                }
+
+                cell.setParent(current);
+                evaluationFunctions(function, cell, goal);
+                fringe.add(cell);
+            }
+
+            visited.addLast(current);
+
+        }
+
+        return current;
+        //createSolution();
+
+    }
+
     public LinkedList<Cell> getVisited() {
         return visited;
     }
@@ -172,4 +202,15 @@ public class Search {
         }
 
     }
+
+    public void createSolution2(Cell goal) {
+        Cell parent = goal.getParent();
+        while(parent.getState() != Cell.State.INITIAL) {
+            //System.out.println(parent.position.X + ":" + parent.position.Y);
+            if(FileManager.cells[parent.position.X][parent.position.Y].getState().equals(Cell.State.OPEN))
+                FileManager.cells[parent.position.X][parent.position.Y].setState(Cell.State.PATH);
+            parent = parent.getParent();
+        }
+    }
+
 }

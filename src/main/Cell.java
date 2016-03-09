@@ -8,11 +8,13 @@ public class Cell {
     public State state;
     public CellPosition position;
     public double cost;
+    public Cell parent;
 
     public Cell(State state, CellPosition position) {
         this.state = state;
         this.position = position;
         this.cost = 0;
+        this.parent = null;
     }
 
     public void setCost(double cost) {
@@ -21,6 +23,14 @@ public class Cell {
 
     public double getCost() {
         return cost;
+    }
+
+    public void setParent(Cell parent) {
+        this.parent = parent;
+    }
+
+    public Cell getParent() {
+        return parent;
     }
 
     public void setState(State state) {
