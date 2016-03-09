@@ -14,7 +14,7 @@ public class FileManager {
     public static Environment createEnvironment(String filename) {
 
         String line = null;
-        String data = "";
+        Cell initial = null, goal = null;
 
         try {
             FileReader fileReader = new FileReader(filename);
@@ -26,30 +26,30 @@ public class FileManager {
             }
             while((line = br.readLine()) != null)
             {
-                data += line;
+                cells = new Cell[size][size];
+
+                int position = 0;
+                for(int i = 0; i < size;) {
+                    for (int j = 0; j < size; j++) {
+                        Cell.State s = Cell.getStateFromChar(line.charAt(position));
+                        cells[j][i] = new Cell(s, new CellPosition(j, i));
+                        if(s.equals(Cell.State.INITIAL)) {
+                            initial = cells[j][i];
+                        } else if(s.equals(Cell.State.GOAL)) {
+                            goal = cells[j][i];
+                        }
+                        position++;
+                        if(position == size) {
+                            position = 0;
+                            i++;
+                            line = br.readLine();
+                        }
+                    }
+                }
             }
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
-
-        cells = new Cell[size][size];
-        Cell initial = null, goal = null;
-
-        int position = 0;
-        for(int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                Cell.State s = Cell.getStateFromChar(data.charAt(position));
-                cells[j][i] = new Cell(s, new CellPosition(j, i));
-                if(s.equals(Cell.State.INITIAL)) {
-                    initial = cells[j][i];
-                } else if(s.equals(Cell.State.GOAL)) {
-                    goal = cells[j][i];
-                }
-                position++;
-            }
-        }
-
-        //printEnvironment();
 
         return new Environment(cells, initial, goal);
     }

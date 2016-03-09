@@ -10,7 +10,8 @@ public class Search {
     private Environment environment;
     private Cell initial, goal, current;
     private PriorityQueue<Cell> fringe;
-    private LinkedList<Cell> visited, path;
+    private LinkedList<Cell> visited;
+    private int path = 0;
 
     public Search(Environment environment) {
         this.environment = environment;
@@ -19,7 +20,6 @@ public class Search {
         this.goal = environment.getGoal();
         this.visited = new LinkedList<Cell>();
         visited.addLast(current);
-        this.path = new LinkedList<Cell>();
         Comparator<Cell> comparator = new CellComparator();
         this.fringe = new PriorityQueue<>(comparator);
     }
@@ -27,12 +27,7 @@ public class Search {
     public class CellComparator implements Comparator<Cell> {
         @Override
         public int compare(Cell a, Cell b) {
-            /*if(manhattan(a, goal) > manhattan(b, goal)) {
-                return -1;
-            }
-            if(manhattan(a, goal) < manhattan(b, goal)){
-                return 1;
-            }*/
+
             if(a.cost > b.cost) {
                 return 1;
             }
@@ -44,7 +39,6 @@ public class Search {
     }
 
     public double euclidean(Cell current, Cell goal) {
-        //double value = Math.sqrt((current.position.X - goal.position.X)^2 + (current.position.Y - goal.position.Y)^2);
         double value = Math.sqrt(Math.pow(current.position.X - goal.position.X, 2) + Math.pow(current.position.Y - goal.position.Y, 2));
         current.setCost(value);
         return value;
@@ -56,14 +50,14 @@ public class Search {
         return value;
     }
 
-    public double euclideanAndCost(Cell current, Cell goa) {
-        double value = euclidean(current, goa) + Double.valueOf(path.size());
+    public double euclideanAndCost(Cell current, Cell goal) {
+        double value = euclidean(current, goal) + 1;
         current.setCost(value);
         return value;
     }
 
     public double manhattanAndCost(Cell current, Cell goal) {
-        double value = manhattan(current, goal) + Double.valueOf(path.size());
+        double value = manhattan(current, goal) + 1;
         current.setCost(value);
         return value;
     }
@@ -83,86 +77,17 @@ public class Search {
         return 0;
     }
 
-    public void bestFirstSearch(int function) {
-
-        while(visited.size() != FileManager.size*FileManager.size && current != goal) {
-
-            LinkedList<Cell> neighbors = environment.getNeighbors(current);
-            for(Cell cell : neighbors) {
-
-                if(visited.contains(cell)) {
-                    continue;
-                }
-                if(cell.getState().equals(Cell.State.GOAL)) {
-                    path.push(cell);
-                    createSolution();
-                    return;
-                }
-
-                //manhattan(cell, goal);
-                evaluationFunctions(function, cell, goal);
-                fringe.add(cell);
-            }
-
-            if(fringe.size() > 0 && !path.contains(current)) {
-                path.push(current);
-            }
-
-            if(fringe.size() == 0) {
-                current = path.pop();
-                continue;
-            }
-
-            if(current == goal)
-                break;
-
-            current = fringe.poll();
-            visited.addLast(current);
-
-            path.push(current);
-            fringe.clear();
-
-        }
-        createSolution();
-
-    }
-
-    public void bestFirstSearch2(int function) {
-
-        fringe.add(current);
-        while(!fringe.isEmpty() && (current != goal)) {
-
-            current = fringe.poll();
-            path.push(current);
-            LinkedList<Cell> neighbors = environment.getNeighbors(current);
-            if(neighbors.isEmpty()) {
-                path.pop();
-            }
-            for(Cell cell : neighbors) {
-
-                if(visited.contains(cell)) {
-                    continue;
-                }
-
-                evaluationFunctions(function, cell, goal);
-                fringe.add(cell);
-            }
-
-            visited.addLast(current);
-
-        }
-        createSolution();
-
-    }
-
-    public Cell bestFirstSearch3(int function) {
+    public Cell bestFirstSearch(int function) {
 
         fringe.add(current);
         while(!fringe.isEmpty()) {
 
             current = fringe.poll();
-            if(current == goal)
+            path++;
+
+            if(current == goal) {
                 return current;
+            }
             LinkedList<Cell> neighbors = environment.getNeighbors(current);
 
             for(Cell cell : neighbors) {
@@ -176,41 +101,38 @@ public class Search {
                 fringe.add(cell);
             }
 
-            visited.addLast(current);
+            visited.add(current);
 
         }
 
         return current;
-        //createSolution();
 
     }
 
-    public LinkedList<Cell> getVisited() {
-        return visited;
+
+    public int getVisitedSize() {
+        return visited.size();
     }
 
-    public LinkedList<Cell> getPath() {
-        return path;
-    }
+    public double createSolution(Cell goal, int function) {
 
-    public void createSolution() {
-
-        LinkedList<Cell> path = getPath();
-        for (Cell c : path) {
-            if(FileManager.cells[c.position.X][c.position.Y].getState().equals(Cell.State.OPEN))
-                FileManager.cells[c.position.X][c.position.Y].setState(Cell.State.PATH);
-        }
-
-    }
-
-    public void createSolution2(Cell goal) {
         Cell parent = goal.getParent();
+        Double cost = 0.0;
+        int count = 1;
         while(parent.getState() != Cell.State.INITIAL) {
-            //System.out.println(parent.position.X + ":" + parent.position.Y);
             if(FileManager.cells[parent.position.X][parent.position.Y].getState().equals(Cell.State.OPEN))
                 FileManager.cells[parent.position.X][parent.position.Y].setState(Cell.State.PATH);
+            cost = cost + parent.getCost();
             parent = parent.getParent();
+            count++;
         }
+        /*if(function == 2)
+            return count;
+        else if(function == 3 || function == 4)
+            return cost + count;
+        else
+            return cost;*/
+        return cost;
     }
 
 }
